@@ -9,7 +9,7 @@ from src.config import settings
 from src.database import Base
 
 # импорт моделей
-from src.models import *
+from src.models import * # noqa
 
 
 

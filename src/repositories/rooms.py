@@ -7,7 +7,6 @@ from src.models.rooms import RoomsModel
 from src.repositories.base import BaseRepositories
 from src.repositories.mappers.mappers import RoomDataMapper, RoomDataWithRelsMapper
 from src.repositories.utils import rooms_ids_for_booking
-from src.schemas.rooms import Room, RoomWithRels
 
 
 class RoomsRepositories(BaseRepositories):

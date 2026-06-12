@@ -1,7 +1,13 @@
+
 from pydantic import BaseModel
+
+from typing import Sequence, Any
+
 from sqlalchemy import select, insert, delete
 from sqlalchemy.sql.expression import update
+from sqlalchemy.exc import NoResultFound
 
+from src.exeptions import ObjectNotFoundException
 from src.repositories.mappers.base import DataMapper
 
 
@@ -25,7 +31,7 @@ class BaseRepositories:
     async def get_all(self, *args, **kwargs):
         return await self.get_filtered()
 
-    async def get_one_or_none(self, **filter_by):
+    async def get_one_or_none(self, **filter_by) -> BaseModel | None | Any:
         query = (select(self.model).filter_by(**filter_by))
         result = await self.session.execute(query)
         model = result.scalars().one_or_none()
@@ -33,6 +39,18 @@ class BaseRepositories:
             return None
         return self.mapper.map_to_domain_entity(model)
 
+    async def get_one(self, **filter_by):
+        # "asyncpg.exceptions.DataError",
+        # "sqlalchemy.dialects.postgresql.asyncpg.Error",
+        # 'sqlalchemy.exc.DBAPIError'
+        # "sqlalchemy.exc.NoResultFound"
+        query = (select(self.model).filter_by(**filter_by))
+        result = await self.session.execute(query)
+        try:
+            model = result.scalar_one()
+        except NoResultFound:
+            raise ObjectNotFoundException
+        return self.mapper.map_to_domain_entity(model)
 
     # def post
     async def add(self, data: BaseModel):
@@ -41,7 +59,7 @@ class BaseRepositories:
         model = result.scalars().one()
         return self.mapper.map_to_domain_entity(model)
 
-    async def add_bulk(self, data: list[BaseModel]):
+    async def add_bulk(self, data: Sequence[BaseModel]):
         add_data_stmt = insert(self.model).values([item.model_dump() for item in data])
         await self.session.execute(add_data_stmt)
 

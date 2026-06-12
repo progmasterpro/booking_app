@@ -1,3 +1,6 @@
+# ruff: noqa: E402
+from typing import AsyncGenerator
+
 import pytest
 import json
 
@@ -15,7 +18,7 @@ from src.schemas.hotels import HotelAdd
 from src.schemas.rooms import RoomAdd
 from src.utils.db_manager import DBManager
 # импорт моделей
-from src.models import *
+from src.models import * # noqa
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -27,7 +30,7 @@ async def get_db_null_pool():
         yield db
 
 @pytest.fixture(scope="function")
-async def db() -> DBManager:
+async def db() -> AsyncGenerator[DBManager]:
     async for db in get_db_null_pool():
         yield db
 
@@ -62,7 +65,7 @@ async def setup_database(check_test_mode):
 
 
 @pytest.fixture(scope="session")
-async def ac() -> AsyncClient:
+async def ac() -> AsyncGenerator[AsyncClient]:
     async with AsyncClient(
             transport=ASGITransport(app=app), base_url="http://test") as ac:
        yield ac
