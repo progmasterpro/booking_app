@@ -2,7 +2,7 @@ from datetime import date
 
 from sqlalchemy import select, func
 
-from src.exeptions import HotelDateFromGtDateTo, HotelNotFoundException
+from src.exeptions import DateFromGtDateTo, HotelNotFoundException
 from src.models.hotels import HotelModel
 from src.models.rooms import RoomsModel
 from src.repositories.base import BaseRepositories
@@ -42,7 +42,7 @@ class HotelsRepositories(BaseRepositories):
             .offset(offset)
         )
         if date_from > date_to:
-            raise HotelDateFromGtDateTo
+            raise DateFromGtDateTo
 
         result = await self.session.execute(query)
 

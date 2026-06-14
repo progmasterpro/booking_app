@@ -13,10 +13,7 @@ class ObjectAlreadyExistException(NameAppException):
 class AllRoomBookedException(NameAppException):
     detail = "Закончились номера для бронирования"
 
-class HotelDateFromGtDateTo(NameAppException):
-    detail = "Дата заезда позже, чем дата выезда"
-
-class RoomsDateFromGtDateTo(NameAppException):
+class DateFromGtDateTo(NameAppException):
     detail = "Дата заезда позже, чем дата выезда"
 
 class HotelNotFoundException(NameAppException):

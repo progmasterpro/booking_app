@@ -5,7 +5,7 @@ from fastapi.openapi.models import Example
 
 from src.api.dependencies import DBDep
 from src.database import async_session_maker
-from src.exeptions import RoomsDateFromGtDateTo, RoomGetNotFoundException, HotelNotFoundException
+from src.exeptions import DateFromGtDateTo, RoomGetNotFoundException, HotelNotFoundException, ObjectNotFoundException
 from src.repositories.rooms import RoomsRepositories
 from src.schemas.facilities import RoomFacilitiesAdd
 from src.schemas.rooms import RoomAdd, RoomAddRequest, RoomPatchRequest, RoomPatch
@@ -22,14 +22,15 @@ async def get_rooms(
 ):
     try:
         return await db.rooms.get_filtered_by_time(hotel_id=hotel_id, date_from=date_from, date_to=date_to)
-    except RoomsDateFromGtDateTo as e:
+    except DateFromGtDateTo as e:
         raise HTTPException(status_code=422, detail=e.detail)
 
 
 @router.get("/{hotel_id}/rooms/{room_id}", summary="Получить один номер")
 async def get_room(hotel_id: int, room_id: int, db: DBDep):
-    return await db.rooms.get_one_or_none_with_rels(id=room_id, hotel_id=hotel_id)
-
+    room = await db.rooms.get_one_or_none_with_rels(id=room_id, hotel_id=hotel_id)
+    if not room:
+        raise HTTPException(status_code=404, detail="Номер не найден")
 
 @router.post("/{hotel_id}/rooms", summary="Добавить номер")
 async def create_rooms(

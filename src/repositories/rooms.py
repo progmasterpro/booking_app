@@ -3,7 +3,7 @@ from datetime import date
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-from src.exeptions import RoomsDateFromGtDateTo
+from src.exeptions import DateFromGtDateTo
 from src.models.rooms import RoomsModel
 from src.repositories.base import BaseRepositories
 from src.repositories.mappers.mappers import RoomDataMapper, RoomDataWithRelsMapper

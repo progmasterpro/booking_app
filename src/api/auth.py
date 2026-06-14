@@ -1,7 +1,8 @@
 from fastapi import APIRouter, HTTPException, Response
 
-from src.api.dependencies import UserIdDep
+from src.api.dependencies import UserIdDep, DBDep
 from src.database import async_session_maker
+from src.exeptions import ObjectAlreadyExistException
 from src.repositories.users import UsersRepositories
 from src.schemas.users import UserRequestAdd, UserAdd
 from src.services.auth import AuthServices
@@ -10,15 +11,17 @@ router = APIRouter(prefix="/auth", tags=["Авторизация и аутент
 
 
 @router.post("/register")
-async def users_register(data: UserRequestAdd):
+async def users_register(
+    data: UserRequestAdd,
+    db: DBDep
+):
+    hashed_password = AuthServices().hash_password(data.password)
+    new_data_user = UserAdd(email=data.email, hashed_password=hashed_password)
     try:
-        hashed_password = AuthServices().hash_password(data.password)
-        new_data_user = UserAdd(email=data.email, hashed_password=hashed_password)
-        async with async_session_maker() as session:
-            await UsersRepositories(session).add(new_data_user)
-            await session.commit()
-    except Exception as e:
-        raise HTTPException(status_code=400, detail="Пользователь с таким Email уже существует")
+        await db.users.add(new_data_user)
+        await db.commit()
+    except ObjectAlreadyExistException:
+        raise HTTPException(status_code=409, detail="Пользователь с таким Email уже существует")
     return {"status": "ok"}
 
 
