@@ -3,6 +3,7 @@ from datetime import date
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
+from src.exeptions import RoomsDateFromGtDateTo
 from src.models.rooms import RoomsModel
 from src.repositories.base import BaseRepositories
 from src.repositories.mappers.mappers import RoomDataMapper, RoomDataWithRelsMapper
@@ -25,6 +26,10 @@ class RoomsRepositories(BaseRepositories):
             .options(selectinload(self.model.facilities))
             .filter(RoomsModel.id.in_(rooms_ids_to_get))
         )
+
+        if date_from > date_to:
+            raise RoomsDateFromGtDateTo
+
         result = await self.session.execute(query)
         return [RoomDataWithRelsMapper.map_to_domain_entity(model) for model in result.scalars().all()]
 

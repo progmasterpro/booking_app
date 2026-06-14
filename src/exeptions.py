@@ -7,9 +7,20 @@ class NameAppException(Exception):
 class ObjectNotFoundException(NameAppException):
     detail = "Объект не найдет"
 
+class ObjectAlreadyExistException(NameAppException):
+    detail = "Похожий объект уже существует"
 
+class AllRoomBookedException(NameAppException):
+    detail = "Закончились номера для бронирования"
 
+class HotelDateFromGtDateTo(NameAppException):
+    detail = "Дата заезда позже, чем дата выезда"
 
+class RoomsDateFromGtDateTo(NameAppException):
+    detail = "Дата заезда позже, чем дата выезда"
 
+class HotelNotFoundException(NameAppException):
+    detail = "Отель не найдет"
 
-
+class RoomGetNotFoundException(NameAppException):
+    detail = "Номер не найдет"

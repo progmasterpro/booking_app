@@ -17,11 +17,9 @@ async def users_register(data: UserRequestAdd):
         async with async_session_maker() as session:
             await UsersRepositories(session).add(new_data_user)
             await session.commit()
-    except:
-        raise HTTPException(status_code=400)
-
+    except Exception as e:
+        raise HTTPException(status_code=400, detail="Пользователь с таким Email уже существует")
     return {"status": "ok"}
-
 
 
 @router.post("/login")

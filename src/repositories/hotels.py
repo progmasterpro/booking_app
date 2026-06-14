@@ -2,6 +2,7 @@ from datetime import date
 
 from sqlalchemy import select, func
 
+from src.exeptions import HotelDateFromGtDateTo, HotelNotFoundException
 from src.models.hotels import HotelModel
 from src.models.rooms import RoomsModel
 from src.repositories.base import BaseRepositories
@@ -30,6 +31,7 @@ class HotelsRepositories(BaseRepositories):
             .filter(RoomsModel.id.in_(rooms_ids_to_get))
         )
         query = select(HotelModel).filter(HotelModel.id.in_(hotels_ids_to_get))
+
         if title:
             query = query.filter(func.lower(HotelModel.title).contains(title.strip().lower()))
         if location:
@@ -39,8 +41,11 @@ class HotelsRepositories(BaseRepositories):
             .limit(limit)
             .offset(offset)
         )
+        if date_from > date_to:
+            raise HotelDateFromGtDateTo
 
         result = await self.session.execute(query)
+
         return [self.mapper.map_to_domain_entity(model) for model in result.scalars().all()]
 
 

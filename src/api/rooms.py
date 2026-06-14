@@ -1,10 +1,11 @@
 from datetime import date
 
-from fastapi import APIRouter, Body, Query
+from fastapi import APIRouter, Body, Query, HTTPException
 from fastapi.openapi.models import Example
 
 from src.api.dependencies import DBDep
 from src.database import async_session_maker
+from src.exeptions import RoomsDateFromGtDateTo, RoomGetNotFoundException, HotelNotFoundException
 from src.repositories.rooms import RoomsRepositories
 from src.schemas.facilities import RoomFacilitiesAdd
 from src.schemas.rooms import RoomAdd, RoomAddRequest, RoomPatchRequest, RoomPatch
@@ -19,7 +20,10 @@ async def get_rooms(
         date_from: date = Query(example="2026-03-11"),
         date_to: date = Query(example="2026-03-15"),
 ):
-    return await db.rooms.get_filtered_by_time(hotel_id=hotel_id, date_from=date_from, date_to=date_to)
+    try:
+        return await db.rooms.get_filtered_by_time(hotel_id=hotel_id, date_from=date_from, date_to=date_to)
+    except RoomsDateFromGtDateTo as e:
+        raise HTTPException(status_code=422, detail=e.detail)
 
 
 @router.get("/{hotel_id}/rooms/{room_id}", summary="Получить один номер")

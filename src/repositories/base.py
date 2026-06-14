@@ -5,9 +5,10 @@ from typing import Sequence, Any
 
 from sqlalchemy import select, insert, delete
 from sqlalchemy.sql.expression import update
-from sqlalchemy.exc import NoResultFound
+from sqlalchemy.exc import NoResultFound, IntegrityError
+from asyncpg.exceptions import UniqueViolationError
 
-from src.exeptions import ObjectNotFoundException
+from src.exeptions import ObjectNotFoundException, ObjectAlreadyExistException
 from src.repositories.mappers.base import DataMapper
 
 
@@ -53,11 +54,18 @@ class BaseRepositories:
         return self.mapper.map_to_domain_entity(model)
 
     # def post
-    async def add(self, data: BaseModel):
-        add_data_stmt = insert(self.model).values(**data.model_dump()).returning(self.model)
-        result = await self.session.execute(add_data_stmt)
-        model = result.scalars().one()
-        return self.mapper.map_to_domain_entity(model)
+    async def add(self, data: BaseModel) -> BaseModel | Any:
+        try:
+            add_data_stmt = insert(self.model).values(**data.model_dump()).returning(self.model)
+            result = await self.session.execute(add_data_stmt)
+            model = result.scalars().one()
+            return self.mapper.map_to_domain_entity(model)
+        except IntegrityError as e:
+            if isinstance(e.orig.__cause__, UniqueViolationError):
+                raise ObjectAlreadyExistException from e
+            else:
+                raise e
+
 
     async def add_bulk(self, data: Sequence[BaseModel]):
         add_data_stmt = insert(self.model).values([item.model_dump() for item in data])
