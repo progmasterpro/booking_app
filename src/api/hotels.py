@@ -4,7 +4,7 @@ from fastapi import Query, APIRouter, Body, HTTPException
 from fastapi.openapi.models import Example
 
 from src.api.dependencies import PaginationDep, DBDep
-from src.exeptions import DateFromGtDateTo, HotelNotFoundException, ObjectNotFoundException
+from src.exeptions import DateFromGtDateTo, HotelNotFoundHTTPException, ObjectNotFoundException
 from src.schemas.hotels import HotelPatch, HotelAdd
 
 router = APIRouter(prefix='/hotels', tags=['Отели'])
@@ -38,7 +38,7 @@ async def get_hotel_id(hotel_id: int, db: DBDep):
     try:
         return await db.hotels.get_one(id=hotel_id)
     except ObjectNotFoundException:
-        raise HTTPException(status_code=404, detail="Отель не найден")
+        raise HotelNotFoundHTTPException
 
 @router.post("", summary="Добавить отель")
 async def create_hotel(

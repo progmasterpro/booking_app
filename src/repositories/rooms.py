@@ -28,7 +28,7 @@ class RoomsRepositories(BaseRepositories):
         )
 
         if date_from > date_to:
-            raise RoomsDateFromGtDateTo
+            raise DateFromGtDateTo
 
         result = await self.session.execute(query)
         return [RoomDataWithRelsMapper.map_to_domain_entity(model) for model in result.scalars().all()]

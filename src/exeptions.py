@@ -1,3 +1,6 @@
+from fastapi import HTTPException
+
+
 class NameAppException(Exception):
     detail = "Неожиданная ошибка"
 
@@ -16,8 +19,19 @@ class AllRoomBookedException(NameAppException):
 class DateFromGtDateTo(NameAppException):
     detail = "Дата заезда позже, чем дата выезда"
 
-class HotelNotFoundException(NameAppException):
+class NameAppHTTPException(HTTPException):
+    status_code = 500
+    detail = None
+
+    def __init__(self):
+        super().__init__(status_code = self.status_code, detail = self.detail)
+
+class HotelNotFoundHTTPException(NameAppHTTPException):
+    status_code = 404
     detail = "Отель не найдет"
 
-class RoomGetNotFoundException(NameAppException):
+class RoomNotFoundHTTPException(NameAppHTTPException):
+    status_code = 404
     detail = "Номер не найдет"
+
+
