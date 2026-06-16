@@ -1,3 +1,4 @@
+import logging
 
 from pydantic import BaseModel
 
@@ -61,9 +62,13 @@ class BaseRepositories:
             model = result.scalars().one()
             return self.mapper.map_to_domain_entity(model)
         except IntegrityError as e:
+            logging.error(
+                f"Не удалось добавить данные в БД, входные данные {data.email},  {type(e.orig.__cause__)}"
+            )
             if isinstance(e.orig.__cause__, UniqueViolationError):
                 raise ObjectAlreadyExistException from e
             else:
+                logging.error(f"Не знакомая ошибка {data.email},  {type(e.orig.__cause__)}")
                 raise e
 
 

@@ -1,13 +1,16 @@
 import sys
+import logging
 from pathlib import Path
 from contextlib import asynccontextmanager
-
 import uvicorn
+
 from fastapi import FastAPI
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 
 sys.path.append(str(Path(__file__).parent.parent))
+
+logging.basicConfig(level=logging.INFO)
 
 from src.api.hotels import router as router_hotels
 from src.api.auth import router as router_auth
