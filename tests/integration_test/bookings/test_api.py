@@ -9,7 +9,7 @@ from tests.conftest import get_db_null_pool
     (5, "2026-05-04", "2026-05-07", 200),
     (5, "2026-05-04", "2026-05-07", 200),
     (5, "2026-05-04", "2026-05-07", 200),
-    (5, "2026-05-04", "2026-05-07", 500),
+    (5, "2026-05-04", "2026-05-07", 409),
 ])
 async def test_add_booking(room_id, date_from, date_to, status_code, db, authenticated_ac):
     room_id = (await db.rooms.get_all())[0].id
