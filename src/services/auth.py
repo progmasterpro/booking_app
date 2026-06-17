@@ -4,10 +4,10 @@ from datetime import timezone, timedelta, datetime
 from fastapi import HTTPException
 from pwdlib import PasswordHash
 from src.config import settings
+from src.services.base import BaseService
 
 
-
-class AuthServices:
+class AuthServices(BaseService):
     password_hash = PasswordHash.recommended()
 
     def create_access_token(self, data: dict) -> str:

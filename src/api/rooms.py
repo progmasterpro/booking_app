@@ -4,7 +4,7 @@ from fastapi import APIRouter, Body, Query, HTTPException
 from fastapi.openapi.models import Example
 
 from src.api.dependencies import DBDep
-from src.exeptions import DateFromGtDateTo, ObjectNotFoundException, RoomNotFoundHTTPException, HotelNotFoundHTTPException
+from src.exeptions import ObjectNotFoundException, RoomNotFoundHTTPException, HotelNotFoundHTTPException
 from src.schemas.facilities import RoomFacilitiesAdd
 from src.schemas.rooms import RoomAdd, RoomAddRequest, RoomPatchRequest, RoomPatch
 
@@ -20,8 +20,8 @@ async def get_rooms(
 ):
     try:
         return await db.rooms.get_filtered_by_time(hotel_id=hotel_id, date_from=date_from, date_to=date_to)
-    except RoomNotFoundHTTPException as e:
-        raise HTTPException(status_code=422, detail=e.detail)
+    except ObjectNotFoundException:
+        raise RoomNotFoundHTTPException
 
 
 @router.get("/{hotel_id}/rooms/{room_id}", summary="Получить один номер")
