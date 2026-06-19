@@ -1,9 +1,7 @@
 from datetime import date
 
-from fastapi import HTTPException
-
-
-from src.schemas.hotels import HotelAdd
+from src.exeptions import ObjectNotFoundException, HotelNotFoundException
+from src.schemas.hotels import HotelAdd, Hotel
 from src.services.base import BaseService
 
 
@@ -47,3 +45,9 @@ class HotelsService(BaseService):
     async def hotel_delete (self, hotel_id: int):
         await self.db.hotels.delete(id=hotel_id)
         await self.db.commit()
+
+    async def get_hotel_exist_check(self, hotel_id: int) -> Hotel:
+        try:
+            return await self.db.hotels.get_one(id=hotel_id)
+        except ObjectNotFoundException:
+            raise HotelNotFoundException

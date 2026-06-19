@@ -42,10 +42,6 @@ class BaseRepositories:
         return self.mapper.map_to_domain_entity(model)
 
     async def get_one(self, **filter_by):
-        # "asyncpg.exceptions.DataError",
-        # "sqlalchemy.dialects.postgresql.asyncpg.Error",
-        # 'sqlalchemy.exc.DBAPIError'
-        # "sqlalchemy.exc.NoResultFound"
         query = (select(self.model).filter_by(**filter_by))
         result = await self.session.execute(query)
         try:

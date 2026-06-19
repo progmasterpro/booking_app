@@ -18,6 +18,12 @@ class NameAppHTTPException(HTTPException):
 class ObjectNotFoundException(NameAppException):
     detail = "Объект не найден"
 
+class RoomNotFoundException(ObjectNotFoundException):
+    detail = "Номер не найден"
+
+class HotelNotFoundException(ObjectNotFoundException):
+    detail = "Отель не найден"
+
 class ObjectAlreadyExistException(NameAppException):
     detail = "Похожий объект уже существует"
 
