@@ -27,6 +27,17 @@ class HotelNotFoundException(ObjectNotFoundException):
 class ObjectAlreadyExistException(NameAppException):
     detail = "Похожий объект уже существует"
 
+class ObjectAlreadyExistHTTPException(NameAppHTTPException):
+    status_code = 409
+    detail = "Похожий объект уже существует"
+
+class EmailAlreadyExistException(NameAppException):
+    detail = "Пользователь с таким email уже существует"
+
+class EmailAlreadyExistHTTPException(NameAppHTTPException):
+    status_code = 409
+    detail = "Пользователь с таким email уже существует"
+
 class AllRoomBookedException(NameAppException):
     detail = "Закончились номера для бронирования"
 

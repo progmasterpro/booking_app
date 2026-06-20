@@ -9,7 +9,7 @@ from sqlalchemy.sql.expression import update
 from sqlalchemy.exc import NoResultFound, IntegrityError
 from asyncpg.exceptions import UniqueViolationError
 
-from src.exeptions import ObjectNotFoundException, ObjectAlreadyExistException
+from src.exeptions import ObjectNotFoundException, ObjectAlreadyExistException, EmailAlreadyExistException
 from src.repositories.mappers.base import DataMapper
 
 
@@ -58,14 +58,19 @@ class BaseRepositories:
             model = result.scalars().one()
             return self.mapper.map_to_domain_entity(model)
         except IntegrityError as e:
+            error_msg = str(e.orig)
             logging.error(
                 f"Не удалось добавить данные в БД, входные данные {data.email},  {type(e.orig.__cause__)}"
             )
             if isinstance(e.orig.__cause__, UniqueViolationError):
-                raise ObjectAlreadyExistException from e
+                if "users_email_key" in error_msg.lower():
+                    raise EmailAlreadyExistException from e
+                else:
+                    raise ObjectAlreadyExistException from e
             else:
                 logging.error(f"Не знакомая ошибка {data.email},  {type(e.orig.__cause__)}")
                 raise e
+
 
 
     async def add_bulk(self, data: Sequence[BaseModel]):

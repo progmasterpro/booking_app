@@ -2,7 +2,8 @@ from fastapi import APIRouter, HTTPException, Response
 
 from src.api.dependencies import UserIdDep, DBDep
 from src.database import async_session_maker
-from src.exeptions import ObjectAlreadyExistException
+from src.exeptions import ObjectAlreadyExistException, EmailAlreadyExistException, EmailAlreadyExistHTTPException, \
+    ObjectAlreadyExistHTTPException
 from src.repositories.users import UsersRepositories
 from src.schemas.users import UserRequestAdd, UserAdd
 from src.services.auth import AuthServices
@@ -10,22 +11,21 @@ from src.services.auth import AuthServices
 router = APIRouter(prefix="/auth", tags=["Авторизация и аутентификация"])
 
 
-@router.post("/register")
+@router.post("/register", summary="Регистрация пользователя")
 async def users_register(
     data: UserRequestAdd,
     db: DBDep
 ):
-    hashed_password = AuthServices().hash_password(data.password)
-    new_data_user = UserAdd(email=data.email, hashed_password=hashed_password)
     try:
-        await db.users.add(new_data_user)
-        await db.commit()
+        await AuthServices(db).users_register(data)
+    except EmailAlreadyExistException:
+        raise EmailAlreadyExistHTTPException
     except ObjectAlreadyExistException:
-        raise HTTPException(status_code=409, detail="Пользователь с таким Email уже существует")
+        raise ObjectAlreadyExistHTTPException
     return {"status": "ok"}
 
 
-@router.post("/login")
+@router.post("/login", summary="Логин")
 async def user_login(
         data: UserRequestAdd,
         response: Response
@@ -41,7 +41,7 @@ async def user_login(
         return {"access_token": access_token}
 
 
-@router.get("/me")
+@router.get("/me", summary="Получение текущего пользователя")
 async def get_me(
         user_id: UserIdDep,
 ):
@@ -49,7 +49,7 @@ async def get_me(
         user = await UsersRepositories(session).get_one_or_none(id=user_id)
     return user
 
-@router.post("/logout")
+@router.post("/logout", summary="Выход пользователя")
 async def user_logout(
         response: Response
 ):

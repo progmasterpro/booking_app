@@ -4,6 +4,8 @@ from datetime import timezone, timedelta, datetime
 from fastapi import HTTPException
 from pwdlib import PasswordHash
 from src.config import settings
+from src.exeptions import ObjectAlreadyExistException, EmailAlreadyExistHTTPException, EmailAlreadyExistException
+from src.schemas.users import UserRequestAdd, UserAdd
 from src.services.base import BaseService
 
 
@@ -29,7 +31,13 @@ class AuthServices(BaseService):
         except jwt.exceptions.DecodeError:
             raise HTTPException(status_code=401, detail="Неверный токен")
 
-
-
-
+    # регистрация пользователя
+    async def users_register(
+            self,
+            data: UserRequestAdd,
+    ):
+        hashed_password = AuthServices().hash_password(data.password)
+        new_data_user = UserAdd(email=data.email, hashed_password=hashed_password)
+        await self.db.users.add(new_data_user)
+        await self.db.commit()
 
