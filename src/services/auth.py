@@ -1,10 +1,10 @@
 import jwt
 from datetime import timezone, timedelta, datetime
 
-from fastapi import HTTPException
 from pwdlib import PasswordHash
+
 from src.config import settings
-from src.exeptions import ObjectAlreadyExistException, EmailAlreadyExistHTTPException, EmailAlreadyExistException
+from src.exeptions import UsersPasswordNotExistException, IncorrectPasswordException, IncorrectTokenException
 from src.schemas.users import UserRequestAdd, UserAdd
 from src.services.base import BaseService
 
@@ -29,15 +29,26 @@ class AuthServices(BaseService):
         try:
             return jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
         except jwt.exceptions.DecodeError:
-            raise HTTPException(status_code=401, detail="Неверный токен")
+            raise IncorrectTokenException
+
 
     # регистрация пользователя
-    async def users_register(
-            self,
-            data: UserRequestAdd,
-    ):
-        hashed_password = AuthServices().hash_password(data.password)
+    async def users_register(self, data: UserRequestAdd):
+        hashed_password = self.hash_password(data.password)
         new_data_user = UserAdd(email=data.email, hashed_password=hashed_password)
         await self.db.users.add(new_data_user)
         await self.db.commit()
+
+
+    async def user_login(self, data: UserRequestAdd):
+        user = await self.db.users.get_user_with_hashed_password(email=data.email)
+        if not user:
+            raise UsersPasswordNotExistException
+        if not self.verify_password(data.password, user.hashed_password):
+            raise IncorrectPasswordException
+        access_token = self.create_access_token({"user_id": user.id})  # из  pydentic схемы
+        return access_token
+
+    async def get_one_or_none(self, user_id: int):
+        return await self.db.users.get_one_or_none(id=user_id)
 

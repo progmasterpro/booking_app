@@ -62,5 +62,20 @@ class DateFromGtDateToHTTPException(NameAppHTTPException):
     detail = "Дата заезда позже, чем дата выезда"
 
 
+class UsersPasswordNotExistException(NameAppException):
+    detail = "Пользователь с таким паролем не зарегистрирован"
 
+class UsersPasswordNotExistHTTPException(NameAppHTTPException):
+    status_code = 401
+    detail = "Пользователь с таким паролем не зарегистрирован"
 
+class IncorrectPasswordException(NameAppException):
+    detail = "Пароль не верный"
+
+class IncorrectPasswordHTTPException(NameAppHTTPException):
+    status_code = 401
+    detail = "Пароль не верный"
+
+class IncorrectTokenException(NameAppException):
+    status_code = 401
+    detail = "Неверный токен"
