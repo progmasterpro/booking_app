@@ -1,43 +1,30 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 
-from src.api.dependencies import UserIdDep
-from src.api.dependencies import DBDep
-from src.exeptions import ObjectNotFoundException, AllRoomBookedException
-from src.schemas.bookings import BookingAddRequest, BookingAdd
-from src.schemas.hotels import Hotel
-from src.schemas.rooms import Room
+from src.api.dependencies import UserIdDep, DBDep
+from src.exeptions import AllRoomBookedException,AllRoomBookedHTTPException
+from src.schemas.bookings import BookingAddRequest
+from src.services.bookings import BookingsService
 
 router = APIRouter(prefix="/bookings", tags=["Бронирование"])
 
 
 @router.get("", summary="Получение всех бронирований")
 async def get_bookings(db: DBDep):
-    return await db.bookings.get_all()
+    return await BookingsService(db).get_bookings()
 
 @router.get("/me", summary="Получение бронирования текущего пользователя")
 async def get_me_booking(user_id: UserIdDep, db: DBDep):
-    return await db.bookings.get_filtered(user_id=user_id)
+    return await BookingsService(db).get_me_booking(user_id)
 
-@router.post("")
+
+@router.post("", summary="Добавление бронирования")
 async def bookings_add(
     user_id: UserIdDep,
     db: DBDep,
     booking_data: BookingAddRequest,
 ):
     try:
-        room: Room = await db.rooms.get_one(id=booking_data.room_id)
-    except ObjectNotFoundException:
-        raise HTTPException(status_code=400, detail="Номер не найден")
-    hotel: Hotel = await db.hotels.get_one(id=room.hotel_id)
-    room_price: int = room.price
-    _booking_data = BookingAdd(
-        user_id=user_id,
-        price=room_price,
-        **booking_data.model_dump(),
-    )
-    try:
-        booking = await db.bookings.add_booking(_booking_data, hotel_id=hotel.id)
-    except AllRoomBookedException as e:
-        raise HTTPException(status_code=409, detail=e.detail)
-    await db.commit()
+        booking = await BookingsService(db).bookings_add(user_id, booking_data)
+    except AllRoomBookedException:
+        raise AllRoomBookedHTTPException
     return {"status": "ok", "data": booking}

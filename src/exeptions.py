@@ -30,6 +30,10 @@ class ObjectAlreadyExistException(NameAppException):
 class AllRoomBookedException(NameAppException):
     detail = "Закончились номера для бронирования"
 
+class AllRoomBookedHTTPException(NameAppHTTPException):
+    status_code = 409
+    detail = "Закончились номера для бронирования"
+
 class HotelNotFoundHTTPException(NameAppHTTPException):
     status_code = 404
     detail = "Отель не найден"
