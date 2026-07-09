@@ -1,4 +1,4 @@
-FROM Python:3.13.7
+FROM python:3.13.7
 
 WORKDIR /app
 
@@ -7,5 +7,5 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
-# CMD ["python", "src/main.py"]
+#CMD ["python", "src/main.py"]
 CMD alembic upgrade head; python src/main.py
