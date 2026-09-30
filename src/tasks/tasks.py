@@ -47,7 +47,7 @@ def resize_image(image_path: str):
 async def get_booking_with_today_chakin_halper():
     print("Я запускаюсь")
     async with DBManager(session_factory=async_session_maker_null_pool) as db:
-        bookings = await db.booking.get_booking_with_today_chakin()
+        bookings = await db.bookings.get_booking_with_today_chakin()
         logging.debug(f"{bookings=}")
 
 
