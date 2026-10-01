@@ -44,7 +44,21 @@ booking_app/
 └── README.md
 ```
 
-## API
+### Быстрый старт
+
+```bash
+git clone https://github.com/progmasterpro/booking_app.git
+cd booking_app
+cp .env.example .env        # Windows: Copy-Item .env.example .env
+docker network create myNetwork
+docker compose up --build
+```
+
+Приложение: http://localhost:7777, документация: http://localhost:7777/docs
+
+> Требуются PostgreSQL и Redis в сети `myNetwork`, значения для `.env` указаны в `.env.example`.
+
+### API
 
 Полное интерактивное описание — в Swagger: http://localhost:7777/docs
 
